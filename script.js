@@ -13,6 +13,12 @@ let height = 600;
 let padding = 40;
 
 let svg = d3.select('svg');
+let title = d3.select('#title');
+let tooltip = d3.select('#tooltip');
+
+let styleTitle = () => {
+	title.style('font-size', '27px')
+}
 
 let drawCanvas = () => {
 	svg.attr('width', width).attr('height', height);
@@ -65,7 +71,37 @@ let drawPoints = () => {
 			return yScale(new Date(item['Seconds'] * 1000))
 		})
 		.attr('fill', (item) => {
-			return item['Doping'] != '' ? 'orange' : 'green'
+			return item['Doping'] != '' ? 'maroon' : 'green'
+		})
+		.on('mouseover', (item) => {
+			tooltip.transition()
+				   .style('visibility', 'visible')
+				   
+			item['Doping'] != ''
+				? tooltip.text(
+						item['Year'] +
+							' - ' +
+							item['Name'] +
+							' - ' +
+							item['Time'] +
+							' - ' +
+							item['Doping']
+				  )
+				: tooltip.text(
+						item['Year'] +
+							' - ' +
+							item['Name'] +
+							' - ' +
+							item['Time'] +
+							' - ' +
+							'No Allegations'
+				  );
+
+			tooltip.attr('data-year', item['Year'])
+		})
+		.on('mouseout', (item) => {
+			tooltip.transition()
+				   .style('visibility', 'hidden')
 		})
 };
 
@@ -91,6 +127,7 @@ req.open('GET', url, true);
 req.onload = () => {
 	values = JSON.parse(req.responseText);
 	console.log(values);
+	styleTitle();
 	drawCanvas();
 	generateScales();
 	drawPoints();
